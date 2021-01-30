@@ -1,0 +1,24 @@
+{
+  "name": "EarnEst",
+  "version": "1.0.0",
+  "description": "This is an investing/trading application to fully or mostly automate managing broker portfolios.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ernie45/EarnEst.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ernie45/EarnEst/issues"
+  },
+  "homepage": "https://github.com/ernie45/EarnEst#readme",
+  "dependencies": {
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1"
+  }
+}
