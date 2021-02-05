@@ -18,6 +18,10 @@
   },
   "homepage": "https://github.com/ernie45/EarnEst#readme",
   "dependencies": {
+    "axios": "^0.21.1",
+    "cheerio": "^1.0.0-rc.5",
+    "create-react-app": "^4.0.1",
+    "express": "^4.17.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"
   }
