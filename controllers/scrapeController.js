@@ -1,12 +1,12 @@
-const axios = require("axios").default;
+const axios = require("axios");
+const url =  `https://api.tdameritrade.com/v1/marketdata/quotes?apikey=${process.env.TD_AUTH}&symbol=tsla`;
 const cheerio = require("cheerio");
 //const stockController = require("./stockController");
 
 module.exports = {
      scrape: async (req, res) => {
-        /* const html =  await axios.get('https://www.robinhood.com/');
-        const $ = await cheerio.load(JSON.stringify(html.data));
-        res.send($.html());
-        console.log($.html()); */
+        axios.get(url).then(data => {
+            res.send(data.data["TSLA"].totalVolume);
+        });
     }
 };
