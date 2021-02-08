@@ -8,6 +8,10 @@ const scrapeController = require("../../controllers/scrapeController");
 
 /** Construct the routings */
 router.route("/").get((req, res) => {
-    scrapeController.scrape(req, res);
-})
+    scrapeController.searchTicker(req, res);
+});
+/** Send info to access database */
+router.route("/saveToWatchlist").put((req, res) => {
+    scrapeController.saveToWatchlist(req, res);
+});
 module.exports = router;

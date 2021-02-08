@@ -1,5 +1,6 @@
 import React, {Component} from "react";
 import {Featured} from "./Featured";
+import {Search} from "./Search";
 
 class MainPage extends Component{
     /** Define the state of the page */
@@ -21,6 +22,9 @@ class MainPage extends Component{
             return <Featured
                 currentPage={this.state.currentPage}
             />
+        } 
+        else if (this.state.currentPage === "Search"){
+            return <Search/>
         };
     };
     render(){
@@ -28,7 +32,7 @@ class MainPage extends Component{
             <div>
                 {this.renderPage()}
             </div>
-        );
+        )
     };
 };
 

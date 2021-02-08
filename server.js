@@ -20,4 +20,5 @@ const PORT = 3001;
 
 app.listen(PORT, () => {
     console.log("App listening on port " + PORT);
+    console.log(process.env.TD_AUTH);
 });

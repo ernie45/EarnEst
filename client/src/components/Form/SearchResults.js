@@ -1,4 +1,4 @@
-import React from "react";
+import React, {Component} from "react";
 import {Row, Column} from "../Grid";
 import {Title} from "./Title";
 
