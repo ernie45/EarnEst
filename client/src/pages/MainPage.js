@@ -6,7 +6,7 @@ import {Watchlist} from "./Watchlist";
 class MainPage extends Component{
     /** Define the state of the page */
     state = {
-        currentPage: "Watchlist"
+        currentPage: "Search"
     };
     /** Upon loading the page */
     componentDidMount = () => {};
