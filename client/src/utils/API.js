@@ -9,11 +9,14 @@ export default {
         });
     },
     /** Receive parameters to save to a database */
-    saveTicker: tick => {
-        return axios.put("api/stocks/saveToWatchlist", {
+    saveTicker: tic => {
+        return axios.get("api/stocks/saveToWatchlist", {
             params: {
-                ticker: tick
+                tick: tic
             }
         });
+    },
+    getSavedTickers: data => {
+        return axios.get("api/stocks/retreiveSavedTickers");
     }
 };

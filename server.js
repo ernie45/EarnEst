@@ -21,4 +21,6 @@ const PORT = 3001;
 app.listen(PORT, () => {
     console.log("App listening on port " + PORT);
     console.log(process.env.TD_AUTH);
+    console.log(process.env.MONGO_PASSWORD);
+    console.log(process.env.MONGO_USERNAME)
 });

@@ -48,7 +48,7 @@ export class Search extends Component{
     handleSavingToWatchlist = event =>{
         event.preventDefault(); 
         /** Call the api to route */
-        API.saveTicker(this.state.inputTicker)
+        API.saveTicker(this.state.returnedTicker)
     };
     render(){
         return(

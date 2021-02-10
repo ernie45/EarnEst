@@ -1,15 +1,16 @@
 import React, {Component} from "react";
 import {Featured} from "./Featured";
 import {Search} from "./Search";
+import {Watchlist} from "./Watchlist";
 
 class MainPage extends Component{
     /** Define the state of the page */
     state = {
-        currentPage: "Featured"
+        currentPage: "Watchlist"
     };
     /** Upon loading the page */
     componentDidMount = () => {};
-    /** Change the tad to the page passsed in */
+    /** Change the tab to the page passsed in */
     handlePageChange = page => {
         /** Change the currentPage state to the props passed in */
         /** This page will become active */
@@ -25,7 +26,10 @@ class MainPage extends Component{
         } 
         else if (this.state.currentPage === "Search"){
             return <Search/>
-        };
+        }
+        else if (this.state.currentPage === "Watchlist"){
+            return <Watchlist/>
+        }
     };
     render(){
         return(

@@ -18,11 +18,13 @@
   },
   "homepage": "https://github.com/ernie45/EarnEst#readme",
   "dependencies": {
+    "assert": "^2.0.0",
     "axios": "^0.21.1",
     "cheerio": "^1.0.0-rc.5",
     "create-react-app": "^4.0.1",
     "express": "^4.17.1",
     "http": "0.0.1-security",
+    "mongoose": "^5.11.15",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-redux": "^7.2.2",
