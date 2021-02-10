@@ -13,7 +13,7 @@ export class Watchlist extends Component{
     }; 
     handleGettingSavedTickers = () => {
         API.getSavedTickers().then(data => {
-            console.log(data);
+            console.log(data.data);
         });
     };
     render(){

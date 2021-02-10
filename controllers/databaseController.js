@@ -23,13 +23,13 @@ module.exports = {
                 }
                 // Insert a single document, wait for promise so we can read it back
                 const p = await col.insertOne(stockDocument);
+                // Print to the console
+                
             }
             
             else if (action === "retreive"){
-                // Insert a single document, wait for promise so we can read it back
-                // const p = await col.find();
-                // res.send(p.data);
-                console.log("trying the database");
+                var arr = await col.find().toArray();
+                res.send(arr);
             }
             
             } catch (err) {
