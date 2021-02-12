@@ -7,11 +7,14 @@ module.exports = {
     searchTicker: (req, res) => {
         apiController.searchStock(req, res);
     },
-    /** Try to save the stock to a database */
-    saveToWatchlist: (req, res) => {
-        databaseController.doStuff(req, res, "save");
-    },
     getFromDatabase: (req, res) => {
         databaseController.doStuff(req, res, "retreive");
+    },
+    /** Try to save the stock to a database */
+    saveToWatchlist: (req, res, callback) => {
+        databaseController.doStuff(req, res, "save");
+    },
+    removeFromWatchlist: (req, res, callback) => {
+        databaseController.doStuff(req, res, "delete");
     }
 };

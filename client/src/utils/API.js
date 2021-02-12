@@ -8,15 +8,24 @@ export default {
             }
         });
     },
+    /** Get Tickers saved on the database */
+    getSavedTickers: data => {
+        return axios.get("/api/stocks/retreiveSavedTickers/");
+    },
     /** Receive parameters to save to a database */
     saveTicker: tic => {
-        return axios.get("api/stocks/saveToWatchlist", {
+        return axios.get("/api/stocks/saveToWatchlist/", {
             params: {
                 tick: tic
             }
         });
     },
-    getSavedTickers: data => {
-        return axios.get("api/stocks/retreiveSavedTickers");
-    }
+    /** Receive parameters to delete from database */
+    removeFromWatchlist: name => {
+        return axios.get("/api/stocks/removeFromWatchlist", {
+            params: {
+                name: name
+            }
+        });
+    },
 };

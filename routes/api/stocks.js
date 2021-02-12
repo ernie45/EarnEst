@@ -23,14 +23,16 @@ client.connect(err => {
 router.route("/").get((req, res) => {
     routingController.searchTicker(req, res);
 });
+/** Get info from database */
+router.route("/retreiveSavedTickers/").get((req, res) => {
+  routingController.getFromDatabase(req, res);
+});
 /** Send info to access database */
 router.route("/saveToWatchlist/").get((req, res) => {
     routingController.saveToWatchlist(req, res);
 });
-
-router.route("/retreiveSavedTickers/").get((req, res) => {
-  routingController.getFromDatabase(req, res);
+router.route("/removeFromWatchlist/").get((req, res) => {
+  routingController.removeFromWatchlist(req, res);
 });
-
 
 module.exports = router;
