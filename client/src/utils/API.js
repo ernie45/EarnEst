@@ -3,7 +3,7 @@ export default {
     /** Receive parameters to search for a stock */
     searchSpecificTicker: tick => {
         return axios.get("/api/stocks/", {
-            params:{
+            params: {
                 ticker: tick
             }
         });
@@ -28,10 +28,13 @@ export default {
             }
         });
     },
-    searchOptionsChain: ticker => {
+    searchOptionsChain: (ticker, todaysISODate, expISODate) => {
         return axios.get("/api/stocks/searchOptionsChain", {
             params: {
-                ticker: ticker
+                ticker: ticker,
+                todaysISODate: todaysISODate,
+                expISODate: expISODate
+
             }
         });
     }
