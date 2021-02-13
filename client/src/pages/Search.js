@@ -109,14 +109,14 @@ export class Search extends Component {
                                                     name={this.state.returnedTicker}
                                                     onClick={(event) => { this.props.handleSavingToWatchlist(event, this.state.returnedTicker) }}
                                                 >
-                                                    + Watchlist
+                                                    ++
                                                 </Button>
                                             ) : (
                                                     <Button
                                                         name={this.state.returnedTicker}
                                                         onClick={this.props.handleRemovingFromWatchlist}
                                                     >
-                                                        - Watchlist
+                                                        --
                                                     </Button>
                                                 )}
                                         </Column>

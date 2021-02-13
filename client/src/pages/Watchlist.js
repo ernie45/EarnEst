@@ -19,7 +19,7 @@ export class Watchlist extends Component{
         return (
             <Row>
                 <Column size="xs-2"></Column>
-                <Column size="xs-8>">
+                <Column size="xs-8">
                     {this.props.savedTickers.length ? (
                         <List>
                             {this.props.savedTickers.map(tick => {
@@ -32,7 +32,7 @@ export class Watchlist extends Component{
                                                     name={tick.name}
                                                     onClick={this.props.handleRemovingFromWatchlist}
                                                 >
-                                                    - Watchlist
+                                                    --
                                                 </Button>
                                             </Column>
                                         </Row>
