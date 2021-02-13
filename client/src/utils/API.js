@@ -28,13 +28,13 @@ export default {
             }
         });
     },
+    /** Retreive weekly options chain */
     searchOptionsChain: (ticker, todaysISODate, expISODate) => {
         return axios.get("/api/stocks/searchOptionsChain", {
             params: {
                 ticker: ticker,
                 todaysISODate: todaysISODate,
                 expISODate: expISODate
-
             }
         });
     }

@@ -7,7 +7,6 @@ export class Listener extends Component {
         super(props);
         this.state = {
 
-
             //props.savedTickers
             //props.checkIfInWatchlist
             //props.inWatchlist
@@ -16,56 +15,67 @@ export class Listener extends Component {
         };
     };
     componentDidMount = () => {
-        var today;
-        var exp;
-        this.getExpirationDate(expire => {
-            exp = `${expire.yyyy}-${expire.mm}-${expire.dd}`;
-        });
-        this.getTodaysDate(hoy => {
-            today = `${hoy.yyyy}-${hoy.mm}-${hoy.dd}`
-        });
-        console.log(today);
-        console.log(exp);
-        this.searchOptionsChain("cgc", today, exp);
+        this.searchOptionsChain("tsla", this.getTodaysDate(), this.getExpirationDate());
     };
-    searchOptionsChain(ticker, today, expiration){
-        API.searchOptionsChain(ticker.toUpperCase(), today, expiration).then(data => {
-            console.log(data.data);
-            console.log(data.data.calls);
-            console.log(data.data.puts);
-        });
-    };
-    getTodaysDate(callback){
+    /** Takes a callback function that grabs onto today's date */
+    getTodaysDate(callback) {
         var today = new Date();
         var dd = String(today.getDate()).padStart(2, '0');
         var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
         var yyyy = today.getFullYear();
-        var dateObj = {dd: dd, mm: mm, yyyy: yyyy};
-        callback(dateObj);
+        var dateObj = { dd: dd, mm: mm, yyyy: yyyy };
+        if (callback) {
+            callback(dateObj);
+        }
+        else {
+            return (yyyy + "-" + mm + "-" + dd);
+        }
     };
-    getExpirationDate(callback){
+    getDaysToExpiration() {
+        /** Monday is 1, Sunday is 7 */
+        var d = new Date();
+        var n = d.getDay();
+        var left = (5 + (7 - n));
+        return left;
+    };
+    /** Create an expiration date a week from today */
+    getExpirationDate() {
+        var expDay;
+        var expMonth;
+        var expYear;
         this.getTodaysDate(date => {
-            var expDay = String(parseInt(date.dd) + 7).padStart(2, "0");
-            var expMonth = date.mm;
-            var expYear = date.yyyy;
-            if (date.mm === "09" || date.mm === "04" || date.mm === "06" || date.mm === "11"){
-                if (parseInt(expDay) > 30){
+            expDay = String(parseInt(date.dd) + this.getDaysToExpiration()).padStart(2, "0");
+            expMonth = date.mm;
+            expYear = date.yyyy;
+            /** Accounting for the fact that months and years can change */
+            if (date.mm === "09" || date.mm === "04" || date.mm === "06" || date.mm === "11") {
+                if (parseInt(expDay) > 30) {
                     expMonth = String(parseInt(date.mm) + 1).padStart(2, "0");
                     expDay = String(parseInt(expDay) - 30).padStart(2, "0");
                 }
             }
             else {
-                if (parseInt(expDay) > 31){
+                if (parseInt(expDay) > 31) {
                     expMonth = String(parseInt(date.mm) + 1).padStart(2, "0");
                     expDay = String(parseInt(expDay) - 31).padStart(2, "0");
                 }
             }
-            if (parseInt(expMonth) > 12){
+            if (parseInt(expMonth) > 12) {
                 expYear = String(parseInt(date.mm) + 1).padStart(2, "0");
                 expDay = "01";
             }
-            var expObj = {dd: expDay, mm: expMonth, yyyy: expYear};
-            callback(expObj);
+        });
+        return (expYear + "-" + expMonth + "-" + expDay);
+    };
+    /** Search api for options pricing */
+    searchOptionsChain(ticker, today, expiration) {
+        API.searchOptionsChain(ticker.toUpperCase(), today, expiration).then(data => {
+            console.log(this.state.today);
+            console.log(this.state.exp);
+            console.log(this.state.daysLeft);
+            console.log(data.data);
+            console.log(data.data.calls);
+            console.log(data.data.puts);
         });
     };
     render() {
