@@ -34,5 +34,8 @@ router.route("/saveToWatchlist/").get((req, res) => {
 router.route("/removeFromWatchlist/").get((req, res) => {
   routingController.removeFromWatchlist(req, res);
 });
+router.route("/searchOptionsChain/").get((req, res) => {
+  routingController.searchOptionsChain(req, res);
+});
 
 module.exports = router;

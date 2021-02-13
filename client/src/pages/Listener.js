@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import API from "../utils/API";
 import { Featured } from "./Featured";
 
 export class Listener extends Component {
@@ -13,6 +14,11 @@ export class Listener extends Component {
             //props.handleSavingToWatchlist
             //props.handleRemovingFromWatchlist
         };
+    };
+    componentDidMount = () => {
+        API.searchOptionsChain("NIO").then(data => {
+            console.log(data.data);
+        });
     };
     render() {
         return (

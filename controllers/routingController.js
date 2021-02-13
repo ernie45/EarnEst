@@ -11,10 +11,13 @@ module.exports = {
         databaseController.doStuff(req, res, "retreive");
     },
     /** Try to save the stock to a database */
-    saveToWatchlist: (req, res, callback) => {
+    saveToWatchlist: (req, res) => {
         databaseController.doStuff(req, res, "save");
     },
-    removeFromWatchlist: (req, res, callback) => {
+    removeFromWatchlist: (req, res) => {
         databaseController.doStuff(req, res, "delete");
+    },
+    searchOptionsChain: (req, res) => {
+        apiController.searchOptionsChain(req, res);
     }
 };

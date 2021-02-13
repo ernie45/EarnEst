@@ -28,4 +28,11 @@ export default {
             }
         });
     },
+    searchOptionsChain: ticker => {
+        return axios.get("/api/stocks/searchOptionsChain", {
+            params: {
+                ticker: ticker
+            }
+        });
+    }
 };
