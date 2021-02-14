@@ -53,12 +53,25 @@ export class Listener extends Component {
         /** Monday is 1, Sunday is 7 */
         var d = new Date();
         var n = d.getDay();
-        var left = (5 + (7 - n));
-        this.setState({
-            daysLeft: left
-        });
-        return left;
-    };
+        console.log(n);
+        var inWeek = (5 - n);
+        var nextWeek = (5 + (7 - n));
+        console.log(inWeek);
+        console.log(nextWeek);
+        /** When it is sunday */
+        if (n >= 0 && n <= 3){
+            this.setState({
+                daysLeft: inWeek
+            });
+            return inWeek;
+        }
+        else{
+            this.setState({
+                daysLeft: nextWeek
+            });
+            return nextWeek;
+        }
+    }
     /** Create an expiration date a week from today */
     getExpirationDate() {
         var expDay;
@@ -94,7 +107,7 @@ export class Listener extends Component {
     /** Search api for options pricing */
     searchOptionsChain(ticker, today, expiration) {
         API.searchOptionsChain(ticker.toUpperCase(), today, expiration).then(data => {
-            var datArr = Object.entries(data.data.calls)[0][1];
+            var datArr = Object.entries(data.data.calls);
             console.log(Object.entries(datArr));
             var callsArray = Object.entries(Object.entries(data.data.calls)[0][1]);
             var putsArray = Object.entries(Object.entries(data.data.puts)[0][1]);
