@@ -70,12 +70,10 @@ export class Listener extends Component {
     /** Search api for options pricing */
     searchOptionsChain(ticker, today, expiration) {
         API.searchOptionsChain(ticker.toUpperCase(), today, expiration).then(data => {
-            console.log(this.state.today);
-            console.log(this.state.exp);
-            console.log(this.state.daysLeft);
-            console.log(data.data);
-            console.log(data.data.calls);
-            console.log(data.data.puts);
+            var datArr = Object.entries(data.data.calls)[0][1];
+            console.log(Object.entries(datArr));
+            var callsArray = Object.entries(Object.entries(data.data.calls)[0][1]);
+            var putsArray = Object.entries(Object.entries(data.data.puts)[0][1]);
         });
     };
     render() {
