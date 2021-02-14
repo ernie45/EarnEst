@@ -19,6 +19,8 @@ module.exports = {
     /** Search weekly options chain using todays date and an expiration date */
     searchOptionsChain(req, res) {
         console.log("Searching for : " + req.query.expISODate);
+        console.log("Also: " + req.query.todaysISODate);
+        console.log("Ticker: " + req.query.ticker);
         axios.get(`${optionsUrl}${req.query.ticker}&contractType=ALL&strikeCount=5&includeQuotes=TRUE&strategy=ANALYTICAL&interval=1&range=ALL&fromDate=${req.query.todaysISODate}&toDate=${req.query.expISODate}&optionType=ALL`).then(data => {
             const weeklyCalls = data.data.callExpDateMap;
             const weeklyPuts = data.data.putExpDateMap;

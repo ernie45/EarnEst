@@ -9,7 +9,7 @@ export class Listener extends Component {
             today: 5,
             daysLeft: "",
             expDate: ""
-            
+
             //props.savedTickers
             //props.checkIfInWatchlist
             //props.inWatchlist
@@ -19,9 +19,18 @@ export class Listener extends Component {
     };
     componentDidMount = () => {
         this.getTodaysDate();
+        this.getDaysToExpiration();
+        this.getExpirationDate();
         console.log(this.props.savedTickers.length)
-        setTimeout(() => {console.log(this.props.savedTickers)}
-            , 2000)
+        setTimeout(() => {
+            console.log(this.state.today);
+            console.log(this.state.daysLeft);
+            console.log(this.state.expDate);
+            console.log(this.props.savedTickers[0].name);
+            for (var i = 0; i < this.props.savedTickers.length; i++){
+                this.searchOptionsChain(this.props.savedTickers[i].name, this.state.today, this.state.expDate)
+            }
+        }, 2000)
     };
     /** Takes a callback function that grabs onto today's date */
     getTodaysDate(callback) {
@@ -96,13 +105,13 @@ export class Listener extends Component {
             <div>
 
                 <h1>{this.state.today}</h1>
-            <Featured
-                savedTickers={this.props.savedTickers}
-                checkIfInWatchlist={this.props.checkIfInWatchlist}
-                inWatchlist={this.props.inWatchlist}
-                handleSavingToWatchlist={this.props.handleSavingToWatchlist}
-                handleRemovingFromWatchlist={this.props.handleRemovingFromWatchlist}
-            />
+                <Featured
+                    savedTickers={this.props.savedTickers}
+                    checkIfInWatchlist={this.props.checkIfInWatchlist}
+                    inWatchlist={this.props.inWatchlist}
+                    handleSavingToWatchlist={this.props.handleSavingToWatchlist}
+                    handleRemovingFromWatchlist={this.props.handleRemovingFromWatchlist}
+                />
             </div>
         )
     };
