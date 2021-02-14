@@ -6,7 +6,10 @@ export class Listener extends Component {
     constructor(props) {
         super(props);
         this.state = {
-
+            today: 5,
+            daysLeft: "",
+            expDate: ""
+            
             //props.savedTickers
             //props.checkIfInWatchlist
             //props.inWatchlist
@@ -15,7 +18,10 @@ export class Listener extends Component {
         };
     };
     componentDidMount = () => {
-        this.searchOptionsChain("tsla", this.getTodaysDate(), this.getExpirationDate());
+        this.getTodaysDate();
+        console.log(this.props.savedTickers.length)
+        setTimeout(() => {console.log(this.props.savedTickers)}
+            , 2000)
     };
     /** Takes a callback function that grabs onto today's date */
     getTodaysDate(callback) {
@@ -28,6 +34,9 @@ export class Listener extends Component {
             callback(dateObj);
         }
         else {
+            this.setState({
+                today: (yyyy + "-" + mm + "-" + dd)
+            });
             return (yyyy + "-" + mm + "-" + dd);
         }
     };
@@ -36,6 +45,9 @@ export class Listener extends Component {
         var d = new Date();
         var n = d.getDay();
         var left = (5 + (7 - n));
+        this.setState({
+            daysLeft: left
+        });
         return left;
     };
     /** Create an expiration date a week from today */
@@ -65,6 +77,9 @@ export class Listener extends Component {
                 expDay = "01";
             }
         });
+        this.setState({
+            expDate: (expYear + "-" + expMonth + "-" + expDay)
+        });
         return (expYear + "-" + expMonth + "-" + expDay);
     };
     /** Search api for options pricing */
@@ -78,6 +93,9 @@ export class Listener extends Component {
     };
     render() {
         return (
+            <div>
+
+                <h1>{this.state.today}</h1>
             <Featured
                 savedTickers={this.props.savedTickers}
                 checkIfInWatchlist={this.props.checkIfInWatchlist}
@@ -85,6 +103,7 @@ export class Listener extends Component {
                 handleSavingToWatchlist={this.props.handleSavingToWatchlist}
                 handleRemovingFromWatchlist={this.props.handleRemovingFromWatchlist}
             />
+            </div>
         )
     };
 }
