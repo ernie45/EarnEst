@@ -37,5 +37,8 @@ router.route("/removeFromWatchlist/").get((req, res) => {
 router.route("/searchOptionsChain/").get((req, res) => {
   routingController.searchOptionsChain(req, res);
 });
+router.route("/getPriceHistory/").get((req, res) => {
+  routingController.getPriceHistory(req, res);
+});
 
 module.exports = router;

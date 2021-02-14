@@ -2,6 +2,7 @@ const axios = require("axios");
 const { request } = require("express");
 const searchUrl = `https://api.tdameritrade.com/v1/marketdata/quotes?apikey=${process.env.TD_AUTH}&symbol=`;
 const optionsUrl = `https://api.tdameritrade.com/v1/marketdata/chains?apikey=${process.env.TD_AUTH}&symbol=`
+const priceHistoryURL = `https://api.tdameritrade.com/v1/marketdata/`
 
 module.exports = {
     /** When a user searches a ticker */
@@ -26,6 +27,11 @@ module.exports = {
             const weeklyPuts = data.data.putExpDateMap;
             const options = { calls: weeklyCalls, puts: weeklyPuts }
             res.send(options);
+        });
+    },
+    getPriceHistory(req, res){
+        axios.get(`${priceHistoryURL}${req.query.ticker}/pricehistory?apikey=${process.env.TD_AUTH}&periodType=month&frequencyType=weekly&period=1&frequency=1`).then(data => {
+            res.send(data.data.candles[3]);
         });
     }
 };

@@ -18,19 +18,22 @@ export class Listener extends Component {
         };
     };
     componentDidMount = () => {
-        this.getTodaysDate();
-        this.getDaysToExpiration();
-        this.getExpirationDate();
-        console.log(this.props.savedTickers.length)
-        setTimeout(() => {
-            console.log(this.state.today);
-            console.log(this.state.daysLeft);
-            console.log(this.state.expDate);
-            console.log(this.props.savedTickers[0].name);
-            for (var i = 0; i < this.props.savedTickers.length; i++){
-                this.searchOptionsChain(this.props.savedTickers[i].name, this.state.today, this.state.expDate)
-            }
-        }, 2000)
+        API.getPriceHistory("NIO").then(data => {
+            console.log(data.data);
+        });
+        // this.getTodaysDate();
+        // this.getDaysToExpiration();
+        // this.getExpirationDate();
+        // console.log(this.props.savedTickers.length)
+        // setTimeout(() => {
+        //     console.log(this.state.today);
+        //     console.log(this.state.daysLeft);
+        //     console.log(this.state.expDate);
+        //     console.log(this.props.savedTickers[0].name);
+        //     for (var i = 0; i < this.props.savedTickers.length; i++){
+        //         this.searchOptionsChain(this.props.savedTickers[i].name, this.state.today, this.state.expDate)
+        //     }
+        // }, 2000)
     };
     /** Takes a callback function that grabs onto today's date */
     getTodaysDate(callback) {
@@ -49,6 +52,7 @@ export class Listener extends Component {
             return (yyyy + "-" + mm + "-" + dd);
         }
     };
+    /** How many days left to our target expiration */
     getDaysToExpiration() {
         /** Monday is 1, Sunday is 7 */
         var d = new Date();

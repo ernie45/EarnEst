@@ -22,7 +22,7 @@ export default {
     },
     /** Receive parameters to delete from database */
     removeFromWatchlist: name => {
-        return axios.get("/api/stocks/removeFromWatchlist", {
+        return axios.get("/api/stocks/removeFromWatchlist/", {
             params: {
                 name: name
             }
@@ -30,11 +30,18 @@ export default {
     },
     /** Retreive weekly options chain */
     searchOptionsChain: (ticker, todaysISODate, expISODate) => {
-        return axios.get("/api/stocks/searchOptionsChain", {
+        return axios.get("/api/stocks/searchOptionsChain/", {
             params: {
                 ticker: ticker,
                 todaysISODate: todaysISODate,
                 expISODate: expISODate
+            }
+        });
+    },
+    getPriceHistory: ticker => {
+        return axios.get("/api/stocks/getPriceHistory/", {
+            params: {
+                ticker: ticker
             }
         });
     }

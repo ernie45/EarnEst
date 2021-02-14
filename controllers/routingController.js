@@ -19,5 +19,8 @@ module.exports = {
     },
     searchOptionsChain: (req, res) => {
         apiController.searchOptionsChain(req, res);
+    },
+    getPriceHistory: (req, res) => {
+        apiController.getPriceHistory(req, res);
     }
 };
