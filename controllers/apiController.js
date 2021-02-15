@@ -31,7 +31,7 @@ module.exports = {
     },
     getPriceHistory(req, res){
         axios.get(`${priceHistoryURL}${req.query.ticker}/pricehistory?apikey=${process.env.TD_AUTH}&periodType=month&frequencyType=weekly&period=1&frequency=1`).then(data => {
-            res.send(data.data.candles[3]);
+            res.send(data.data);
         });
     }
 };

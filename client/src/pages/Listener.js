@@ -18,22 +18,26 @@ export class Listener extends Component {
         };
     };
     componentDidMount = () => {
-        API.getPriceHistory("NIO").then(data => {
-            console.log(data.data);
-        });
-        // this.getTodaysDate();
-        // this.getDaysToExpiration();
-        // this.getExpirationDate();
-        // console.log(this.props.savedTickers.length)
-        // setTimeout(() => {
-        //     console.log(this.state.today);
-        //     console.log(this.state.daysLeft);
-        //     console.log(this.state.expDate);
-        //     console.log(this.props.savedTickers[0].name);
-        //     for (var i = 0; i < this.props.savedTickers.length; i++){
-        //         this.searchOptionsChain(this.props.savedTickers[i].name, this.state.today, this.state.expDate)
-        //     }
-        // }, 2000)
+        var priceHistArr = [];
+        setTimeout(() => {
+            for (var i = 0; i < this.props.savedTickers.length; i++) {
+                console.log(this.props.savedTickers[i].name)
+                this.getPriceHistory(this.props.savedTickers[i].name, priceHistArr);
+            }
+            console.log(priceHistArr);
+        }, 2000);
+        /* this.getTodaysDate();
+        this.getDaysToExpiration();
+        this.getExpirationDate();
+        setTimeout(() => {
+            console.log(this.state.today);
+            console.log(this.state.daysLeft);
+            console.log(this.state.expDate);
+            console.log(this.props.savedTickers[0].name);
+            for (var i = 0; i < this.props.savedTickers.length; i++){
+                this.searchOptionsChain(this.props.savedTickers[i].name, this.state.today, this.state.expDate)
+            }
+        }, 2000) */
     };
     /** Takes a callback function that grabs onto today's date */
     getTodaysDate(callback) {
@@ -63,13 +67,13 @@ export class Listener extends Component {
         console.log(inWeek);
         console.log(nextWeek);
         /** When it is sunday */
-        if (n >= 0 && n <= 3){
+        if (n >= 0 && n <= 3) {
             this.setState({
                 daysLeft: inWeek
             });
             return inWeek;
         }
-        else{
+        else {
             this.setState({
                 daysLeft: nextWeek
             });
@@ -108,6 +112,16 @@ export class Listener extends Component {
         });
         return (expYear + "-" + expMonth + "-" + expDay);
     };
+    /** Retreive price history for all stocks in our watchlist */
+    getPriceHistory(ticker, priceHistArr) {
+        API.getPriceHistory(ticker).then(data => {
+            priceHistArr.push({
+                ticker: data.data.symbol,
+                weeklyHigh: data.data.candles[3].high,
+                weeklyLow: data.data.candles[3].low
+            })
+        })
+    };
     /** Search api for options pricing */
     searchOptionsChain(ticker, today, expiration) {
         API.searchOptionsChain(ticker.toUpperCase(), today, expiration).then(data => {
@@ -120,7 +134,6 @@ export class Listener extends Component {
     render() {
         return (
             <div>
-
                 <h1>{this.state.today}</h1>
                 <Featured
                     savedTickers={this.props.savedTickers}
