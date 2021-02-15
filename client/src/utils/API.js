@@ -1,7 +1,7 @@
 import axios from "axios";
 export default {
     /** Receive parameters to search for a stock */
-    searchSpecificTicker: tick => {
+    searchStock: tick => {
         return axios.get("/api/stocks/", {
             params: {
                 ticker: tick

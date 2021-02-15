@@ -8,9 +8,7 @@ module.exports = {
     /** When a user searches a ticker */
     searchStock(req, res) {
         axios.get(searchUrl + req.query.ticker).then(data => {
-            const tick = req.query.ticker;
-            const upperCaseTick = tick.toUpperCase();
-            res.send(data.data[upperCaseTick]);
+            res.send(data.data);
         })
     },
     /** Handle retreiving updated info */
@@ -19,9 +17,6 @@ module.exports = {
     },
     /** Search weekly options chain using todays date and an expiration date */
     searchOptionsChain(req, res) {
-        console.log("Searching for : " + req.query.expISODate);
-        console.log("Also: " + req.query.todaysISODate);
-        console.log("Ticker: " + req.query.ticker);
         axios.get(`${optionsUrl}${req.query.ticker}&contractType=ALL&strikeCount=5&includeQuotes=TRUE&strategy=ANALYTICAL&interval=1&range=ALL&fromDate=${req.query.todaysISODate}&toDate=${req.query.expISODate}&optionType=ALL`).then(data => {
             const weeklyCalls = data.data.callExpDateMap;
             const weeklyPuts = data.data.putExpDateMap;
