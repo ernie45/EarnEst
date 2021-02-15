@@ -24,7 +24,12 @@ export class Listener extends Component {
         setTimeout(() => {
             this.getAllPriceHistory();
             setTimeout(() => {
-                console.log(this.state.priceHistArr);
+                this.updateNestPrices();
+                setTimeout(() => {
+                    console.log(this.state.stockPriceArr);
+                    console.log(this.state.priceHistArr);
+                    this.checkPriceClosetoLevel();
+                }, 2000);
             }, 2000);
         }, 2000);
     };
@@ -119,10 +124,9 @@ export class Listener extends Component {
         else {return this.props.savedTickers[0].name}
     };
     /** Look up current prices for each stock in watchlist */
-    searchNestPrices(){
+    updateNestPrices(){
         API.searchStock(this.combineTickers()).then(data => {
             var stockPriceArr = [];
-            console.log(data.data)
             for (var i = 0; i < this.props.savedTickers.length; i++){
                 var tickObj = data.data[this.props.savedTickers[i].name]
                 stockPriceArr.push({
@@ -148,6 +152,18 @@ export class Listener extends Component {
                 weeklyLow: data.data.candles[3].low
             })
         })
+    };
+    /** Chec if we should consider an options trade */
+    checkPriceClosetoLevel(){
+        for (var i = 0; i < this.state.stockPriceArr.length; i++){
+            for (var j = 0; j < this.state.priceHistArr.length; j++){
+                if (this.state.stockPriceArr[i].ticker === this.state.priceHistArr[j].ticker){
+                    if (Math.abs(this.state.priceHistArr[j].weeklyHigh - this.state.stockPriceArr[i].lastPrice) <= 5 || Math.abs(this.state.stockPriceArr[i].lastPrice - this.state.priceHistArr[j].weeklyLow <= 5)){
+                        console.log(`Get ready child: ${this.state.priceHistArr[j].ticker}`);
+                    }
+                }
+            }
+        }
     };
     getAllPriceHistory(){
         /** Load up the watchlist */

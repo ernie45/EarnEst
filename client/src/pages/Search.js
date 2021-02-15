@@ -38,11 +38,11 @@ export class Search extends Component {
     handleSearching = event => {
         event.preventDefault();
         /** Call the api to search a specific stock*/
-        API.searchSpecificTicker(this.state.inputTicker).then(data => {
+        API.searchStock(this.state.inputTicker).then(data => {
             if (data.data) {
                 this.setState({
-                    returnedTicker: data.data.symbol,
-                    lastPrice: data.data.regularMarketLastPrice,
+                    returnedTicker: data.data[this.state.inputTicker.toUpperCase()].symbol,
+                    lastPrice: data.data[this.state.inputTicker.toUpperCase()].regularMarketLastPrice,
                     /** Let the app know a ticker has been searched */
                     /** Only if data was retreived on a specific stock */
                     isTickerSearched: true
