@@ -16,6 +16,7 @@ export class Featured extends Component{
             //props.inWatchlist
             //props.handleSavingToWatchlist
             //props.handleRemovingFromWatchlist
+            //props.stockPriceArr
         };
     };
     /** Change the tab to the page passsed in */
@@ -33,6 +34,7 @@ export class Featured extends Component{
                 inWatchlist={this.props.inWatchlist}
                 handleSavingToWatchlist={this.props.handleSavingToWatchlist}
                 handleRemovingFromWatchlist={this.props.handleRemovingFromWatchlist}
+                stockPriceArr={this.props.stockPriceArr}
             />
         }
         else if (this.state.currentPage === "Watchlist") {
@@ -42,6 +44,7 @@ export class Featured extends Component{
                 inWatchlist={this.props.inWatchlist}
                 handleSavingToWatchlist={this.props.handleSavingToWatchlist}
                 handleRemovingFromWatchlist={this.props.handleRemovingFromWatchlist}
+                stockPriceArr={this.props.stockPriceArr}
             />
         }
     };

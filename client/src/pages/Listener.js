@@ -22,13 +22,11 @@ export class Listener extends Component {
     componentDidMount = () => {
         this.getDateInfo();
         setTimeout(() => {
-            this.getAllPriceHistory();
+            this.updateNestPrices();
             setTimeout(() => {
-                this.updateNestPrices();
+                this.getAllPriceHistory();
                 setTimeout(() => {
-                    console.log(this.state.stockPriceArr);
-                    console.log(this.state.priceHistArr);
-                    this.checkPriceClosetoLevel();
+                    this.checkPriceLevels();
                 }, 2000);
             }, 2000);
         }, 2000);
@@ -113,21 +111,21 @@ export class Listener extends Component {
         this.getExpirationDate();
     };
     /** Put all the watchlist together to retreive pricing */
-    combineTickers(){
+    combineTickers() {
         var tickerStr = "";
-        if (this.props.savedTickers.length > 1){
-            for (var i = 0; i < this.props.savedTickers.length; i++){
+        if (this.props.savedTickers.length > 1) {
+            for (var i = 0; i < this.props.savedTickers.length; i++) {
                 tickerStr += `,${this.props.savedTickers[i].name}`;
             }
             return tickerStr;
         }
-        else {return this.props.savedTickers[0].name}
+        else { return this.props.savedTickers[0].name }
     };
     /** Look up current prices for each stock in watchlist */
-    updateNestPrices(){
+    updateNestPrices() {
         API.searchStock(this.combineTickers()).then(data => {
             var stockPriceArr = [];
-            for (var i = 0; i < this.props.savedTickers.length; i++){
+            for (var i = 0; i < this.props.savedTickers.length; i++) {
                 var tickObj = data.data[this.props.savedTickers[i].name]
                 stockPriceArr.push({
                     ticker: tickObj.symbol,
@@ -138,6 +136,7 @@ export class Listener extends Component {
                     percentChange: tickObj.netPercentChangeInDouble
                 });
             }
+            stockPriceArr.sort((a, b) => { if (a.ticker > b.ticker) { return 1 } else { return -1 } });
             this.setState({
                 stockPriceArr: stockPriceArr
             });
@@ -146,47 +145,173 @@ export class Listener extends Component {
     /** Retreive price history for all stocks in our watchlist */
     getPriceHistory(ticker, priceHistArr) {
         API.getPriceHistory(ticker).then(data => {
+            var high;
+            if (data.data.candles[3].high > data.data.candles[0].high) {
+                high = data.data.candles[3].high;
+            }
+            else { high = data.data.candles[0].high }
+            var targLow;
+            if (data.data.candles[3].low < data.data.candles[0].low) {
+                targLow = data.data.candles[3].low;
+            }
+            else { targLow = data.data.candles[0].low }
             priceHistArr.push({
                 ticker: data.data.symbol,
-                weeklyHigh: data.data.candles[3].high,
-                weeklyLow: data.data.candles[3].low
+                targetHigh: high,
+                weeklyLow: data.data.candles[3].low,
+                monthlyLow: data.data.candles[0].low,
+                targetLow: targLow
             })
+            priceHistArr.sort((a, b) => { if (a.ticker > b.ticker) { return 1 } else { return -1 } });
         })
     };
-    /** Chec if we should consider an options trade */
-    checkPriceClosetoLevel(){
-        for (var i = 0; i < this.state.stockPriceArr.length; i++){
-            for (var j = 0; j < this.state.priceHistArr.length; j++){
-                if (this.state.stockPriceArr[i].ticker === this.state.priceHistArr[j].ticker){
-                    if (Math.abs(this.state.priceHistArr[j].weeklyHigh - this.state.stockPriceArr[i].lastPrice) <= 5 || Math.abs(this.state.stockPriceArr[i].lastPrice - this.state.priceHistArr[j].weeklyLow <= 5)){
-                        console.log(`Get ready child: ${this.state.priceHistArr[j].ticker}`);
-                    }
-                }
-            }
-        }
-    };
-    getAllPriceHistory(){
-        /** Load up the watchlist */
+    /** Retreive last weeks lows and highs */
+    getAllPriceHistory() {
         var priceHistArr = [];
         for (var i = 0; i < this.props.savedTickers.length; i++) {
             this.getPriceHistory(this.props.savedTickers[i].name, priceHistArr);
         }
+        priceHistArr.sort((a, b) => { if (a.ticker > b.ticker) { return 1 } else { return -1 } });
         this.setState({
             priceHistArr: priceHistArr
         });
     };
+    /** Chec if we should consider an options trade */
+    checkPriceLevels() {
+        for (var i = 0; i < this.state.stockPriceArr.length; i++) {
+            /** If price is greater than or equal to the weekly high */
+            /** Or if the price is just below it */
+            if (this.state.stockPriceArr[i].lastPrice >= this.state.priceHistArr[i].targetHigh || Math.abs(this.state.priceHistArr[i].targetHigh - this.state.stockPriceArr[i].lastPrice) <= 3) {
+                /** Consider searching options chain */
+                this.searchOptionsChain(this.state.stockPriceArr[i].ticker, this.state.today, this.state.expDate, "Calls", this.state.priceHistArr[i].targetHigh, data => {
+                    this.findTheVertical(data);
+                });
+            }
+            /** If price is at or below the weekly low */
+            /** Or if the price is just above it */
+            else if (this.state.stockPriceArr[i].lastPrice <= this.state.priceHistArr[i].targetLow || Math.abs(this.state.stockPriceArr[i].lastPrice - this.state.priceHistArr[i].targetLow) <= 3) {
+                /** Consider searching options chain */
+                this.searchOptionsChain(this.state.stockPriceArr[i].ticker, this.state.today, this.state.expDate, "Puts", this.state.priceHistArr[i].targetLow, data => {
+                    this.findTheVertical(data);
+                });
+            }
+        }
+    };
     /** Search api for options pricing */
-    searchOptionsChain(ticker, today, expiration) {
-        API.searchOptionsChain(ticker.toUpperCase(), today, expiration).then(data => {
-            var datArr = Object.entries(data.data.calls);
-            console.log(Object.entries(datArr));
-            var callsArray = Object.entries(Object.entries(data.data.calls)[0][1]);
-            var putsArray = Object.entries(Object.entries(data.data.puts)[0][1]);
+    searchOptionsChain(ticker, today, expiration, type, extreme, callback) {
+        API.searchOptionsChain(ticker, today, expiration).then(data => {
+            var opts;
+            if (type) {
+                if (type === "Calls") {
+                    opts = Object.entries(Object.entries(data.data.calls)[0][1]);
+                }
+                else if (type === "Puts") {
+                    opts = Object.entries(Object.entries(data.data.puts)[0][1]);
+                }
+            }
+            if (extreme) {
+                this.checkByExtreme(ticker, opts, type, extreme, data => {
+                    callback(data);
+                });
+            }
         });
+    };
+    /** When looking for options by extrema */
+    checkByExtreme(ticker, opts, extremeType, extreme, callback) {
+        console.log(ticker);
+        console.log(extremeType);
+        console.log(extreme);
+        var bidAsk = [];
+        if (extremeType === "Calls") {
+            for (var j = 0; j < opts.length; j++) {
+                if (opts[j][0] >= extreme) {
+                    var optionInfo = opts[j][1][0];
+                    bidAsk.push({
+                        ticker: ticker,
+                        mainInfo: {
+                            type: optionInfo.putCall,
+                            strike: optionInfo.strikePrice,
+                            bid: optionInfo.bid,
+                            ask: optionInfo.ask,
+                            expirationDate: optionInfo.expirationDate,
+                            inTheMoney: optionInfo.inTheMoney,
+                            lastTradingDay: optionInfo.lastTradingDay
+                        },
+                        tradingHelpers: {
+                            openInterest: optionInfo.openInterest,
+                            totalVolume: optionInfo.totalVolume,
+                            volatility: optionInfo.volatility,
+                        },
+                        greeks: {
+                            delta: optionInfo.delta,
+                            theta: optionInfo.theta,
+                            vega: optionInfo.vega,
+                            gamma: optionInfo.gamma,
+                            rho: optionInfo.rho
+                        },
+                        priceChanges: {
+                            lastPrice: optionInfo.last,
+                            highPrice: optionInfo.highPrice,
+                            lowPrice: optionInfo.lowPrice,
+                            percentChange: optionInfo.percentChange,
+                            netChange: optionInfo.netChange
+                        }
+                    });
+                }
+            }
+        }
+        else if (extremeType === "Puts") {
+            for (var j = 0; j < opts.length; j++) {
+                if (opts[j][0] <= extreme) {
+                    var optionInfo = opts[j][1][0];
+                    bidAsk.push({
+                        ticker: ticker,
+                        mainInfo: {
+                            type: optionInfo.putCall,
+                            strike: optionInfo.strikePrice,
+                            bid: optionInfo.bid,
+                            ask: optionInfo.ask,
+                            expirationDate: optionInfo.expirationDate,
+                            inTheMoney: optionInfo.inTheMoney,
+                            lastTradingDay: optionInfo.lastTradingDay
+                        },
+                        tradingHelpers: {
+                            openInterest: optionInfo.openInterest,
+                            totalVolume: optionInfo.totalVolume,
+                            volatility: optionInfo.volatility,
+                        },
+                        greeks: {
+                            delta: optionInfo.delta,
+                            theta: optionInfo.theta,
+                            vega: optionInfo.vega,
+                            gamma: optionInfo.gamma,
+                            rho: optionInfo.rho
+                        },
+                        priceChanges: {
+                            lastPrice: optionInfo.last,
+                            highPrice: optionInfo.highPrice,
+                            lowPrice: optionInfo.lowPrice,
+                            percentChange: optionInfo.percentChange,
+                            netChange: optionInfo.netChange
+                        }
+                    });
+                }
+            }
+        }
+        callback(bidAsk);
+    };
+    findTheVertical(bidAsk) {
+        console.log(bidAsk);
+        for (var i = 1; i < bidAsk.length - 1; i++) {
+            if ((bidAsk[i - 1].mainInfo.bid - bidAsk[i].mainInfo.ask) >= (bidAsk[i].mainInfo.strike - bidAsk[i - 1].mainInfo.strike)/2){
+                console.log(`You can sell strike width: ${(bidAsk[i].mainInfo.strike - bidAsk[i - 1].mainInfo.strike)} for a price of: ${(bidAsk[i - 1].mainInfo.bid - bidAsk[i].mainInfo.ask)}`);
+            }
+        }
     };
     render() {
         return (
             <Featured
+                stockPriceArr={this.state.stockPriceArr}
                 savedTickers={this.props.savedTickers}
                 checkIfInWatchlist={this.props.checkIfInWatchlist}
                 inWatchlist={this.props.inWatchlist}
