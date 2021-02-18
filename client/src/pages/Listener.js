@@ -22,7 +22,9 @@ export class Listener extends Component {
     componentDidMount = () => {
         this.getDateInfo();
         setTimeout(() => {
-            this.updateNestPrices();
+            setInterval(() => {
+                this.updateNestPrices();
+            }, 3000);
             setTimeout(() => {
                 this.getAllPriceHistory();
                 setTimeout(() => {
@@ -145,22 +147,28 @@ export class Listener extends Component {
     /** Retreive price history for all stocks in our watchlist */
     getPriceHistory(ticker, priceHistArr) {
         API.getPriceHistory(ticker).then(data => {
-            var high;
-            if (data.data.candles[3].high > data.data.candles[0].high) {
-                high = data.data.candles[3].high;
+            var length = data.data.candles.length;
+            /** Grab last weeks extremes */
+            var weeklyHigh = data.data.candles[length - 1].high;
+            var weeklyLow = data.data.candles[length - 1].low;
+            /** Try to find monthly extremes */
+            var monthlyHigh = data.data.candles[0].high;
+            var monthlyLow = data.data.candles[0].low;
+            /** Traverse the data array for extremes */
+            for (var i = 1; i < data.data.candles.length; i++){
+                if (data.data.candles[i].high > monthlyHigh){
+                    monthlyHigh = data.data.candles[i].high;
+                }
+                else if (data.data.candles[i].low < monthlyLow){
+                    monthlyLow = data.data.candles[i].low;
+                }
             }
-            else { high = data.data.candles[0].high }
-            var targLow;
-            if (data.data.candles[3].low < data.data.candles[0].low) {
-                targLow = data.data.candles[3].low;
-            }
-            else { targLow = data.data.candles[0].low }
             priceHistArr.push({
                 ticker: data.data.symbol,
-                targetHigh: high,
-                weeklyLow: data.data.candles[3].low,
-                monthlyLow: data.data.candles[0].low,
-                targetLow: targLow
+                weeklyLow: weeklyLow,
+                weeklyHigh: weeklyHigh,
+                monthlyLow: monthlyLow,
+                monthlyHigh: monthlyHigh,
             })
             priceHistArr.sort((a, b) => { if (a.ticker > b.ticker) { return 1 } else { return -1 } });
         })
@@ -181,17 +189,23 @@ export class Listener extends Component {
         for (var i = 0; i < this.state.stockPriceArr.length; i++) {
             /** If price is greater than or equal to the weekly high */
             /** Or if the price is just below it */
-            if (this.state.stockPriceArr[i].lastPrice >= this.state.priceHistArr[i].targetHigh || Math.abs(this.state.priceHistArr[i].targetHigh - this.state.stockPriceArr[i].lastPrice) <= 3) {
+            if (this.state.stockPriceArr[i].lastPrice >= this.state.priceHistArr[i].weeklyHigh || Math.abs(this.state.priceHistArr[i].weeklyHigh - this.state.stockPriceArr[i].lastPrice) <= 3) {
+                console.log(this.state.stockPriceArr[i].ticker)
+                console.log("last price: " + this.state.stockPriceArr[i].lastPrice);
+                console.log("weeklyHigh: " + this.state.priceHistArr[i].weeklyHigh);
                 /** Consider searching options chain */
-                this.searchOptionsChain(this.state.stockPriceArr[i].ticker, this.state.today, this.state.expDate, "Calls", this.state.priceHistArr[i].targetHigh, data => {
+                this.searchOptionsChain(this.state.stockPriceArr[i].ticker, this.state.today, this.state.expDate, "Calls", this.state.priceHistArr[i].weeklyHigh, data => {
                     this.findTheVertical(data);
                 });
             }
             /** If price is at or below the weekly low */
             /** Or if the price is just above it */
-            else if (this.state.stockPriceArr[i].lastPrice <= this.state.priceHistArr[i].targetLow || Math.abs(this.state.stockPriceArr[i].lastPrice - this.state.priceHistArr[i].targetLow) <= 3) {
+            else if (this.state.stockPriceArr[i].lastPrice <= this.state.priceHistArr[i].weeklyLow || Math.abs(this.state.stockPriceArr[i].lastPrice - this.state.priceHistArr[i].weeklyLow) <= 3) {
+                console.log(this.state.stockPriceArr[i].ticker)
+                console.log("last price: " + this.state.stockPriceArr[i].lastPrice);
+                console.log("weeklyLow: " + this.state.priceHistArr[i].weeklyLow);
                 /** Consider searching options chain */
-                this.searchOptionsChain(this.state.stockPriceArr[i].ticker, this.state.today, this.state.expDate, "Puts", this.state.priceHistArr[i].targetLow, data => {
+                this.searchOptionsChain(this.state.stockPriceArr[i].ticker, this.state.today, this.state.expDate, "Puts", this.state.priceHistArr[i].weeklyLow, data => {
                     this.findTheVertical(data);
                 });
             }
@@ -218,9 +232,7 @@ export class Listener extends Component {
     };
     /** When looking for options by extrema */
     checkByExtreme(ticker, opts, extremeType, extreme, callback) {
-        console.log(ticker);
-        console.log(extremeType);
-        console.log(extreme);
+        /** bidAsk will take in all the info to be called back to perform a trade */
         var bidAsk = [];
         if (extremeType === "Calls") {
             for (var j = 0; j < opts.length; j++) {
@@ -302,10 +314,25 @@ export class Listener extends Component {
     };
     findTheVertical(bidAsk) {
         console.log(bidAsk);
-        for (var i = 1; i < bidAsk.length - 1; i++) {
-            if ((bidAsk[i - 1].mainInfo.bid - bidAsk[i].mainInfo.ask) >= (bidAsk[i].mainInfo.strike - bidAsk[i - 1].mainInfo.strike)/2){
-                console.log(`You can sell strike width: ${(bidAsk[i].mainInfo.strike - bidAsk[i - 1].mainInfo.strike)} for a price of: ${(bidAsk[i - 1].mainInfo.bid - bidAsk[i].mainInfo.ask)}`);
+        if (bidAsk[0].mainInfo.type === "CALL"){
+            var checkPoint = [];
+            for (var i = 1; i < bidAsk.length - 1; i++) {
+                if ((bidAsk[i - 1].mainInfo.bid - bidAsk[i].mainInfo.ask) >= (bidAsk[i].mainInfo.strike - bidAsk[i - 1].mainInfo.strike)/2){
+                    console.log(`You can sell the ${bidAsk[i].ticker} ${bidAsk[i - 1].mainInfo.strike}/${bidAsk[i].mainInfo.strike} calls spread width: ${(bidAsk[i].mainInfo.strike - bidAsk[i - 1].mainInfo.strike)} for a price of: ${(bidAsk[i - 1].mainInfo.bid - bidAsk[i].mainInfo.ask)}`);
+                    checkPoint.push({ticker: bidAsk[i].ticker, sell: bidAsk[i - 1].mainInfo.strike, buy: bidAsk[i].mainInfo.strike, price: (bidAsk[i - 1].mainInfo.bid - bidAsk[i].mainInfo.ask)});
+                }
             }
+            console.log(checkPoint);
+        }
+        else if (bidAsk[0].mainInfo.type === "PUT"){
+            checkPoint = [];
+            for (var i = 1; i < bidAsk.length - 1; i++) {
+                if ((bidAsk[i].mainInfo.bid - bidAsk[i - 1].mainInfo.ask) >= (bidAsk[i].mainInfo.strike - bidAsk[i - 1].mainInfo.strike)/2){
+                    console.log(`You can sell the ${bidAsk[i].ticker} ${bidAsk[i].mainInfo.strike}/${bidAsk[i - 1].mainInfo.strike} puts spread width: ${(bidAsk[i].mainInfo.strike - bidAsk[i - 1].mainInfo.strike)} for a price of: ${(bidAsk[i].mainInfo.bid - bidAsk[i - 1].mainInfo.ask)}`);
+                    checkPoint.push({ticker: bidAsk[i].ticker, sell: bidAsk[i].mainInfo.strike, buy: bidAsk[i - 1].mainInfo.strike, price: (bidAsk[i].mainInfo.bid - bidAsk[i - 1].mainInfo.ask)});
+                }
+            }
+            console.log(checkPoint);
         }
     };
     render() {
