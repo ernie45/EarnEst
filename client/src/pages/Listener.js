@@ -29,6 +29,7 @@ export class Listener extends Component {
                 this.getAllPriceHistory();
                 setTimeout(() => {
                     this.checkPriceLevels();
+                    this.getStartDate();
                 }, 2000);
             }, 2000);
         }, 2000);
@@ -55,11 +56,8 @@ export class Listener extends Component {
         /** Monday is 1, Sunday is 7 */
         var d = new Date();
         var n = d.getDay();
-        console.log(n);
         var inWeek = (5 - n);
         var nextWeek = (5 + (7 - n));
-        console.log(inWeek);
-        console.log(nextWeek);
         /** When it is sunday */
         if (n >= 0 && n <= 3) {
             this.setState({
@@ -74,6 +72,39 @@ export class Listener extends Component {
             return nextWeek;
         }
     }
+    getStartDate(){
+        var d = new Date();
+        var n = d.getDay();
+        if (n > 3 && n < 6){
+            var startDay;
+            var startMonth;
+            var startYear;
+            this.getTodaysDate(today => {
+                startDay = String((parseInt(today.dd) + n)).padStart(2, "0");
+                startMonth = today.mm;
+                startYear = today.yyyy;
+                if (today.mm === "09" || today.mm === "04" || today.mm === "06" || today.mm === "11") {
+                    if (parseInt(startDay) > 30) {
+                        startMonth = String(parseInt(today.mm) + 1).padStart(2, "0");
+                        startDay = String(parseInt(startDay) - 30).padStart(2, "0");
+                    }
+                }
+                else {
+                    if (parseInt(startDay) > 31) {
+                        startMonth = String(parseInt(today.mm) + 1).padStart(2, "0");
+                        startDay = String(parseInt(startDay) - 31).padStart(2, "0");
+                    }
+                }
+                if (parseInt(startMonth) > 12) {
+                    startYear = String(parseInt(today.yyyy) + 1).padStart(2, "0");
+                    startDay = String(24 - parseInt(startDay)).padStart(2, "0");
+                    startMonth = "01";
+                }
+            });
+            console.log(startYear + " " + startMonth + " " + startDay);
+            return (startYear + " " + startMonth + " " + startDay);
+        };
+    };
     /** Create an expiration date a week from today */
     getExpirationDate() {
         var expDay;
@@ -97,8 +128,9 @@ export class Listener extends Component {
                 }
             }
             if (parseInt(expMonth) > 12) {
-                expYear = String(parseInt(date.mm) + 1).padStart(2, "0");
-                expDay = "01";
+                expYear = String(parseInt(date.yyyy) + 1).padStart(2, "0");
+                expDay = String(24 - parseInt(expDay)).padStart(2, "0");
+                expMonth = "01";
             }
         });
         this.setState({
@@ -129,7 +161,7 @@ export class Listener extends Component {
             var stockPriceArr = [];
             for (var i = 0; i < this.props.savedTickers.length; i++) {
                 var tickObj = data.data[this.props.savedTickers[i].name]
-                this.updateStats(tickObj, tickObj.volatility);
+                // this.updateStats(tickObj, tickObj.volatility)
                 stockPriceArr.push({
                     ticker: tickObj.symbol,
                     lastPrice: tickObj.lastPrice,
@@ -140,7 +172,7 @@ export class Listener extends Component {
                 });
             }
             stockPriceArr.sort((a, b) => { if (a.ticker > b.ticker) { return 1 } else { return -1 } });
-            this.updateStats(stockPriceArr);
+            // this.updateStats(stockPriceArr);
             this.setState({
                 stockPriceArr: stockPriceArr
             });
@@ -197,9 +229,6 @@ export class Listener extends Component {
             /** If price is greater than or equal to the weekly high */
             /** Or if the price is just below it */
             if (this.state.stockPriceArr[i].lastPrice >= this.state.priceHistArr[i].monthlyHigh || Math.abs(this.state.priceHistArr[i].monthlyHigh - this.state.stockPriceArr[i].lastPrice) <= 3) {
-                console.log(this.state.stockPriceArr[i].ticker)
-                console.log("last price: " + this.state.stockPriceArr[i].lastPrice);
-                console.log("monthlyyHigh: " + this.state.priceHistArr[i].monthlyHigh);
                 /** Consider searching options chain */
                 this.searchOptionsChain(this.state.stockPriceArr[i].ticker, this.state.today, this.state.expDate, "Calls", this.state.priceHistArr[i].monthlyHigh, data => {
                     this.findTheTrade(data);
@@ -208,9 +237,6 @@ export class Listener extends Component {
             /** If price is at or below the weekly low */
             /** Or if the price is just above it */
             else if (this.state.stockPriceArr[i].lastPrice <= this.state.priceHistArr[i].weeklyLow || Math.abs(this.state.stockPriceArr[i].lastPrice - this.state.priceHistArr[i].weeklyLow) <= 3) {
-                console.log(this.state.stockPriceArr[i].ticker)
-                console.log("last price: " + this.state.stockPriceArr[i].lastPrice);
-                console.log("weeklyLow: " + this.state.priceHistArr[i].weeklyLow);
                 /** Consider searching options chain */
                 this.searchOptionsChain(this.state.stockPriceArr[i].ticker, this.state.today, this.state.expDate, "Puts", this.state.priceHistArr[i].weeklyLow, data => {
                     this.findTheTrade(data);
@@ -320,11 +346,10 @@ export class Listener extends Component {
         callback(bidAsk);
     };
     findTheTrade(bidAsk) {
-        console.log(bidAsk);
-        this.getAVertical(bidAsk);
+        this.getShortVertical(bidAsk);
         this.getLongNaked(bidAsk);
     };
-    getAVertical(bidAsk){
+    getShortVertical(bidAsk){
         if (bidAsk[0].mainInfo.type === "CALL"){
             var checkPoint = [];
             for (var i = 1; i < bidAsk.length - 1; i++) {
