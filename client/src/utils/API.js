@@ -44,5 +44,8 @@ export default {
                 ticker: ticker
             }
         });
+    },
+    updateStats: vol => {
+        console.log(vol.ticker + ": " + vol.volatility);
     }
 };

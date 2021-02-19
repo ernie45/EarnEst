@@ -17,6 +17,7 @@ export class Featured extends Component{
             //props.handleSavingToWatchlist
             //props.handleRemovingFromWatchlist
             //props.stockPriceArr
+            //props.priceHistArr
         };
     };
     /** Change the tab to the page passsed in */
@@ -45,6 +46,7 @@ export class Featured extends Component{
                 handleSavingToWatchlist={this.props.handleSavingToWatchlist}
                 handleRemovingFromWatchlist={this.props.handleRemovingFromWatchlist}
                 stockPriceArr={this.props.stockPriceArr}
+                priceHistArr={this.props.priceHistArr}
             />
         }
     };

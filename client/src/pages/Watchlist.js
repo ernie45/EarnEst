@@ -15,12 +15,13 @@ export class Watchlist extends Component {
             /**props.handleRemovingFromWatchlist */
             /**props.handleSavingToWatchlist */
             /**props.stockPriceArr */
+            /**props.priceHistArr */
         };
     };
     /** Pull in saved articles as soon as the page loads */
     componentDidMount = () => { };
     showMore = ticker => {
-        console.log(`Show more of: ${ticker}`);
+        console.log("Working with " + ticker);
         if (!this.state.showMore) {
             this.setState({
                 showMore: true,
@@ -28,12 +29,12 @@ export class Watchlist extends Component {
             });
         }
         else {
-            if (this.state.clickedOn !== ticker){
+            if (this.state.clickedOn !== ticker) {
                 this.setState({
                     clickedOn: ticker
                 });
             }
-            else{
+            else {
                 this.setState({
                     showMore: false,
                     clickOn: ""
@@ -51,41 +52,40 @@ export class Watchlist extends Component {
                             {this.props.savedTickers.map(tick => {
                                 return (
                                     <Item key={tick._id}>
-                                        {this.props.stockPriceArr.filter(data => {
-                                            return (data.ticker === tick.name);
-                                        }).map(stock => {
-                                            return <div><Row onClick={() => this.showMore(tick.name)}>
-                                                <Column size="xs-4">{tick.name}</Column>
-                                                <Column size="xs-4">
-
-                                                    <Row>
+                                        <div><Row onClick={() => this.showMore(tick.name)}>
+                                            <Column size="xs-4">{tick.name}</Column>
+                                            <Column size="xs-4">
+                                                {this.props.stockPriceArr.filter(data => {
+                                                    return (data.ticker === tick.name);
+                                                }).map(stock => {
+                                                    return <Row>
                                                         <Column size="xs-12">
                                                             {stock.lastPrice}
                                                         </Column>
                                                     </Row>
-                                                </Column>
-                                                <Column size="xs-4">
-                                                    <Button
-                                                        name={tick.name}
-                                                        onClick={this.props.handleRemovingFromWatchlist}
-                                                    >
-                                                        --
+                                                })}
+                                            </Column>
+                                            <Column size="xs-4">
+                                                <Button
+                                                    name={tick.name}
+                                                    onClick={this.props.handleRemovingFromWatchlist}
+                                                >
+                                                    --
                                                 </Button>
-                                                </Column>
-                                            </Row>
+                                            </Column>
+                                            {this.state.showMore && this.state.clickedOn === tick.name ? (
                                                 <Row>
-                                                    {this.state.showMore ? (
-                                                        <Row>
-                                                            {this.state.clickedOn === tick.name ? (
-                                                                <Column size="xs-6">
-                                                                    {stock.lastPrice}
-                                                                </Column>
-                                                            ) : (<div></div>)}
-                                                        </Row>
-                                                    ) : (<div></div>)}
+                                                    {this.props.priceHistArr.filter(data => {
+                                                        return (data.ticker === tick.name)
+                                                    }).map(stock => {
+                                                        return <Column size="xs-6">
+                                                            {`Targets:\nHigh${stock.monthlyHigh},\nLow:${stock.weeklyLow}`}
+                                                        </Column>
+                                                    })}
                                                 </Row>
-                                            </div>
-                                        })}
+                                            ) : (<div></div>)}
+                                        </Row>
+                                        </div>
                                     </Item>
                                 )
                             })}
