@@ -72,14 +72,15 @@ export class Listener extends Component {
             return nextWeek;
         }
     }
-    getStartDate(){
-        var d = new Date();
-        var n = d.getDay();
-        if (n > 3 && n < 6){
-            var startDay;
-            var startMonth;
-            var startYear;
-            this.getTodaysDate(today => {
+    getStartDate() {
+        var startDay;
+        var startMonth;
+        var startYear;
+        var startDate;
+        this.getTodaysDate(today => {
+            var d = new Date();
+            var n = d.getDay();
+            if (n > 3 && n < 6) {
                 startDay = String((parseInt(today.dd) + n)).padStart(2, "0");
                 startMonth = today.mm;
                 startYear = today.yyyy;
@@ -100,10 +101,13 @@ export class Listener extends Component {
                     startDay = String(24 - parseInt(startDay)).padStart(2, "0");
                     startMonth = "01";
                 }
-            });
-            console.log(startYear + " " + startMonth + " " + startDay);
-            return (startYear + " " + startMonth + " " + startDay);
-        };
+                startDate = (startYear + "-" + startMonth + "-" + startDay);
+            }
+            else {
+                startDate = (today.yyyy + "-" + today.mm + "-" + today.dd);
+            }
+        });
+        return startDate;
     };
     /** Create an expiration date a week from today */
     getExpirationDate() {
@@ -178,7 +182,7 @@ export class Listener extends Component {
             });
         });
     }
-    updateStats(ticker, volatility){
+    updateStats(ticker, volatility) {
         console.log(ticker);
         console.log(volatility);
         // API.updateStats(vol);
@@ -194,11 +198,11 @@ export class Listener extends Component {
             var monthlyHigh = data.data.candles[0].high;
             var monthlyLow = data.data.candles[0].low;
             /** Traverse the data array for extremes */
-            for (var i = 1; i < data.data.candles.length; i++){
-                if (data.data.candles[i].high > monthlyHigh){
+            for (var i = 1; i < data.data.candles.length; i++) {
+                if (data.data.candles[i].high > monthlyHigh) {
                     monthlyHigh = data.data.candles[i].high;
                 }
-                else if (data.data.candles[i].low < monthlyLow){
+                else if (data.data.candles[i].low < monthlyLow) {
                     monthlyLow = data.data.candles[i].low;
                 }
             }
@@ -230,7 +234,7 @@ export class Listener extends Component {
             /** Or if the price is just below it */
             if (this.state.stockPriceArr[i].lastPrice >= this.state.priceHistArr[i].monthlyHigh || Math.abs(this.state.priceHistArr[i].monthlyHigh - this.state.stockPriceArr[i].lastPrice) <= 3) {
                 /** Consider searching options chain */
-                this.searchOptionsChain(this.state.stockPriceArr[i].ticker, this.state.today, this.state.expDate, "Calls", this.state.priceHistArr[i].monthlyHigh, data => {
+                this.searchOptionsChain(this.state.stockPriceArr[i].ticker, this.getStartDate(), this.state.expDate, "Calls", this.state.priceHistArr[i].monthlyHigh, data => {
                     this.findTheTrade(data);
                 });
             }
@@ -238,15 +242,15 @@ export class Listener extends Component {
             /** Or if the price is just above it */
             else if (this.state.stockPriceArr[i].lastPrice <= this.state.priceHistArr[i].weeklyLow || Math.abs(this.state.stockPriceArr[i].lastPrice - this.state.priceHistArr[i].weeklyLow) <= 3) {
                 /** Consider searching options chain */
-                this.searchOptionsChain(this.state.stockPriceArr[i].ticker, this.state.today, this.state.expDate, "Puts", this.state.priceHistArr[i].weeklyLow, data => {
+                this.searchOptionsChain(this.state.stockPriceArr[i].ticker, this.getStartDate(), this.state.expDate, "Puts", this.state.priceHistArr[i].weeklyLow, data => {
                     this.findTheTrade(data);
                 });
             }
         }
     };
     /** Search api for options pricing */
-    searchOptionsChain(ticker, today, expiration, type, extreme, callback) {
-        API.searchOptionsChain(ticker, today, expiration).then(data => {
+    searchOptionsChain(ticker, startDate, expiration, type, extreme, callback) {
+        API.searchOptionsChain(ticker, startDate, expiration).then(data => {
             var opts;
             if (type) {
                 if (type === "Calls") {
@@ -346,57 +350,56 @@ export class Listener extends Component {
         callback(bidAsk);
     };
     findTheTrade(bidAsk) {
-        this.getShortVertical(bidAsk);
+        // this.getShortVertical(bidAsk);
         this.getLongNaked(bidAsk);
     };
-    getShortVertical(bidAsk){
-        if (bidAsk[0].mainInfo.type === "CALL"){
+    getShortVertical(bidAsk) {
+        if (bidAsk[0].mainInfo.type === "CALL") {
             var checkPoint = [];
             for (var i = 1; i < bidAsk.length - 1; i++) {
-                if ((bidAsk[i - 1].mainInfo.bid - bidAsk[i].mainInfo.ask) >= (bidAsk[i].mainInfo.strike - bidAsk[i - 1].mainInfo.strike)/2){
+                if ((bidAsk[i - 1].mainInfo.bid - bidAsk[i].mainInfo.ask) >= (bidAsk[i].mainInfo.strike - bidAsk[i - 1].mainInfo.strike) / 2) {
                     console.log(`You can sell the ${bidAsk[i].ticker} ${bidAsk[i - 1].mainInfo.strike}/${bidAsk[i].mainInfo.strike} call vertical spread swidth: ${(bidAsk[i].mainInfo.strike - bidAsk[i - 1].mainInfo.strike)} for a price of: ${(bidAsk[i - 1].mainInfo.bid - bidAsk[i].mainInfo.ask)}`);
-                    checkPoint.push({ticker: bidAsk[i].ticker, sell: bidAsk[i - 1].mainInfo.strike, buy: bidAsk[i].mainInfo.strike, price: (bidAsk[i - 1].mainInfo.bid - bidAsk[i].mainInfo.ask)});
+                    checkPoint.push({ ticker: bidAsk[i].ticker, sell: bidAsk[i - 1].mainInfo.strike, buy: bidAsk[i].mainInfo.strike, price: (bidAsk[i - 1].mainInfo.bid - bidAsk[i].mainInfo.ask) });
                 }
             }
-            console.log(checkPoint);
+            // console.log(checkPoint);
         }
-        else if (bidAsk[0].mainInfo.type === "PUT"){
+        else if (bidAsk[0].mainInfo.type === "PUT") {
             checkPoint = [];
             for (var i = 1; i < bidAsk.length - 1; i++) {
-                if ((bidAsk[i].mainInfo.bid - bidAsk[i - 1].mainInfo.ask) >= (bidAsk[i].mainInfo.strike - bidAsk[i - 1].mainInfo.strike)/2){
+                if ((bidAsk[i].mainInfo.bid - bidAsk[i - 1].mainInfo.ask) >= (bidAsk[i].mainInfo.strike - bidAsk[i - 1].mainInfo.strike) / 2) {
                     console.log(`You can buy the ${bidAsk[i].ticker} ${bidAsk[i].mainInfo.strike}/${bidAsk[i - 1].mainInfo.strike} puts vertical spread width: ${(bidAsk[i].mainInfo.strike - bidAsk[i - 1].mainInfo.strike)} for a price of: ${(bidAsk[i].mainInfo.bid - bidAsk[i - 1].mainInfo.ask)}`);
-                    checkPoint.push({ticker: bidAsk[i].ticker, sell: bidAsk[i].mainInfo.strike, buy: bidAsk[i - 1].mainInfo.strike, price: (bidAsk[i].mainInfo.bid - bidAsk[i - 1].mainInfo.ask)});
+                    checkPoint.push({ ticker: bidAsk[i].ticker, sell: bidAsk[i].mainInfo.strike, buy: bidAsk[i - 1].mainInfo.strike, price: (bidAsk[i].mainInfo.bid - bidAsk[i - 1].mainInfo.ask) });
                 }
             }
-            console.log(checkPoint);
+            // console.log(checkPoint);
         }
     };
-    getLongNaked(bidAsk){
-        console.log("In the naked function");
+    getLongNaked(bidAsk) {
         console.log(bidAsk);
         var call;
         var put;
-        if (bidAsk[0].mainInfo.type === "CALL"){
+        if (bidAsk[0].mainInfo.type === "CALL") {
             call = bidAsk[0];
             console.log(call);
         }
-        else if (bidAsk[0].mainInfo.type === "PUT"){
-            put = bidAsk[bidAsk.length];
+        else if (bidAsk[0].mainInfo.type === "PUT") {
+            put = bidAsk[bidAsk.length - 1];
             console.log(put);
         }
     };
     render() {
         return (
             <div>
-            <Featured
-                savedTickers={this.props.savedTickers}
-                stockPriceArr={this.state.stockPriceArr}
-                priceHistArr={this.state.priceHistArr}
-                checkIfInWatchlist={this.props.checkIfInWatchlist}
-                inWatchlist={this.props.inWatchlist}
-                handleSavingToWatchlist={this.props.handleSavingToWatchlist}
-                handleRemovingFromWatchlist={this.props.handleRemovingFromWatchlist}
-            />
+                <Featured
+                    savedTickers={this.props.savedTickers}
+                    stockPriceArr={this.state.stockPriceArr}
+                    priceHistArr={this.state.priceHistArr}
+                    checkIfInWatchlist={this.props.checkIfInWatchlist}
+                    inWatchlist={this.props.inWatchlist}
+                    handleSavingToWatchlist={this.props.handleSavingToWatchlist}
+                    handleRemovingFromWatchlist={this.props.handleRemovingFromWatchlist}
+                />
             </div>
         )
     };
