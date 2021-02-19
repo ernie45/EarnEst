@@ -189,12 +189,12 @@ export class Listener extends Component {
         for (var i = 0; i < this.state.stockPriceArr.length; i++) {
             /** If price is greater than or equal to the weekly high */
             /** Or if the price is just below it */
-            if (this.state.stockPriceArr[i].lastPrice >= this.state.priceHistArr[i].weeklyHigh || Math.abs(this.state.priceHistArr[i].weeklyHigh - this.state.stockPriceArr[i].lastPrice) <= 3) {
+            if (this.state.stockPriceArr[i].lastPrice >= this.state.priceHistArr[i].monthlyHigh || Math.abs(this.state.priceHistArr[i].monthlyHigh - this.state.stockPriceArr[i].lastPrice) <= 3) {
                 console.log(this.state.stockPriceArr[i].ticker)
                 console.log("last price: " + this.state.stockPriceArr[i].lastPrice);
-                console.log("weeklyHigh: " + this.state.priceHistArr[i].weeklyHigh);
+                console.log("monthlyyHigh: " + this.state.priceHistArr[i].monthlyHigh);
                 /** Consider searching options chain */
-                this.searchOptionsChain(this.state.stockPriceArr[i].ticker, this.state.today, this.state.expDate, "Calls", this.state.priceHistArr[i].weeklyHigh, data => {
+                this.searchOptionsChain(this.state.stockPriceArr[i].ticker, this.state.today, this.state.expDate, "Calls", this.state.priceHistArr[i].monthlyHigh, data => {
                     this.findTheVertical(data);
                 });
             }
@@ -318,7 +318,8 @@ export class Listener extends Component {
             var checkPoint = [];
             for (var i = 1; i < bidAsk.length - 1; i++) {
                 if ((bidAsk[i - 1].mainInfo.bid - bidAsk[i].mainInfo.ask) >= (bidAsk[i].mainInfo.strike - bidAsk[i - 1].mainInfo.strike)/2){
-                    console.log(`You can sell the ${bidAsk[i].ticker} ${bidAsk[i - 1].mainInfo.strike}/${bidAsk[i].mainInfo.strike} calls spread width: ${(bidAsk[i].mainInfo.strike - bidAsk[i - 1].mainInfo.strike)} for a price of: ${(bidAsk[i - 1].mainInfo.bid - bidAsk[i].mainInfo.ask)}`);
+                    console.log(`You can buy the ${bidAsk[i].ticker} ${bidAsk[i - 1].mainInfo.strike}/${bidAsk[i].mainInfo.strike} calls`);
+                    // width: ${(bidAsk[i].mainInfo.strike - bidAsk[i - 1].mainInfo.strike)} for a price of: ${(bidAsk[i - 1].mainInfo.bid - bidAsk[i].mainInfo.ask)}`
                     checkPoint.push({ticker: bidAsk[i].ticker, sell: bidAsk[i - 1].mainInfo.strike, buy: bidAsk[i].mainInfo.strike, price: (bidAsk[i - 1].mainInfo.bid - bidAsk[i].mainInfo.ask)});
                 }
             }
@@ -328,7 +329,7 @@ export class Listener extends Component {
             checkPoint = [];
             for (var i = 1; i < bidAsk.length - 1; i++) {
                 if ((bidAsk[i].mainInfo.bid - bidAsk[i - 1].mainInfo.ask) >= (bidAsk[i].mainInfo.strike - bidAsk[i - 1].mainInfo.strike)/2){
-                    console.log(`You can sell the ${bidAsk[i].ticker} ${bidAsk[i].mainInfo.strike}/${bidAsk[i - 1].mainInfo.strike} puts spread width: ${(bidAsk[i].mainInfo.strike - bidAsk[i - 1].mainInfo.strike)} for a price of: ${(bidAsk[i].mainInfo.bid - bidAsk[i - 1].mainInfo.ask)}`);
+                    console.log(`You can buy the ${bidAsk[i].ticker} ${bidAsk[i].mainInfo.strike}/${bidAsk[i - 1].mainInfo.strike} puts`);
                     checkPoint.push({ticker: bidAsk[i].ticker, sell: bidAsk[i].mainInfo.strike, buy: bidAsk[i - 1].mainInfo.strike, price: (bidAsk[i].mainInfo.bid - bidAsk[i - 1].mainInfo.ask)});
                 }
             }
@@ -337,6 +338,7 @@ export class Listener extends Component {
     };
     render() {
         return (
+            <div>
             <Featured
                 stockPriceArr={this.state.stockPriceArr}
                 savedTickers={this.props.savedTickers}
@@ -345,6 +347,7 @@ export class Listener extends Component {
                 handleSavingToWatchlist={this.props.handleSavingToWatchlist}
                 handleRemovingFromWatchlist={this.props.handleRemovingFromWatchlist}
             />
+            </div>
         )
     };
 }

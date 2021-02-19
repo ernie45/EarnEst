@@ -9,7 +9,8 @@ export class Watchlist extends Component {
         super(props);
         this.state = {
             clicked: [],
-            showMore: false
+            showMore: false,
+            clickedOn: ""
             /**props.savedTickers */
             /**props.handleRemovingFromWatchlist */
             /**props.handleSavingToWatchlist */
@@ -18,18 +19,26 @@ export class Watchlist extends Component {
     };
     /** Pull in saved articles as soon as the page loads */
     componentDidMount = () => { };
-    showMore = (event, ticker) => {
-        event.preventDefault();
-        console.log("Show more");
-        if (this.state.showMore) {
+    showMore = ticker => {
+        console.log(`Show more of: ${ticker}`);
+        if (!this.state.showMore) {
             this.setState({
-                showMore: false
+                showMore: true,
+                clickedOn: ticker
             });
         }
         else {
-            this.setState({
-                showMore: true
-            });
+            if (this.state.clickedOn !== ticker){
+                this.setState({
+                    clickedOn: ticker
+                });
+            }
+            else{
+                this.setState({
+                    showMore: false,
+                    clickOn: ""
+                });
+            }
         }
     }
     render() {
@@ -45,7 +54,7 @@ export class Watchlist extends Component {
                                         {this.props.stockPriceArr.filter(data => {
                                             return (data.ticker === tick.name);
                                         }).map(stock => {
-                                            return <div><Row>
+                                            return <div><Row onClick={() => this.showMore(tick.name)}>
                                                 <Column size="xs-4">{tick.name}</Column>
                                                 <Column size="xs-4">
 
@@ -64,15 +73,17 @@ export class Watchlist extends Component {
                                                 </Button>
                                                 </Column>
                                             </Row>
-                                            <Row>
-                                                {this.state.showMore ? (
-                                                    <Row>
-                                                        <Column size="xs-6">
-                                                            {stock.lastPrice}
-                                                        </Column>
-                                                    </Row>
-                                                ): (<div></div>)}
-                                            </Row>
+                                                <Row>
+                                                    {this.state.showMore ? (
+                                                        <Row>
+                                                            {this.state.clickedOn === tick.name ? (
+                                                                <Column size="xs-6">
+                                                                    {stock.lastPrice}
+                                                                </Column>
+                                                            ) : (<div></div>)}
+                                                        </Row>
+                                                    ) : (<div></div>)}
+                                                </Row>
                                             </div>
                                         })}
                                     </Item>
